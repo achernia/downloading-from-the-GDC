@@ -1,0 +1,41 @@
+rm(list = ls())
+library("TCGAbiolinks")
+library(SummarizedExperiment)
+setwd("/Users/achernia/Documents/GBMlggdata")
+
+
+#this is for downloading data from TCGA GBM tumors.  change to the cohort that you are interested in
+query.exp.hg38 <- GDCquery(
+  project = "TCGA-GBM", 
+  data.category = "Transcriptome Profiling", 
+  data.type = "Gene Expression Quantification", 
+  workflow.type = "STAR - Counts")
+samples.primary.tumour <-query.exp.hg38[query.exp.hg38$shortLetterCode == "TP"]
+
+GDCdownload(query.exp.hg38)
+expdat <- GDCprepare(
+  query = query.exp.hg38,
+  save = TRUE, 
+  save.filename = "exp.rda"
+)
+
+
+samples.primary.tumour <- expdat[expdat$shortLetterCode == "TP"]
+GBM_samples <- samples.primary.tumour$barcode
+exp_data <- assays(expdat)
+tpm_df <-  exp_data$tpm_unstrand
+gene_ana  <- rowRanges(expdat)  
+gene_ana_table <- data.frame(gene_ana)
+
+tpm_df_2 <- tpm_df[,colnames(tpm_df) %in% GBM_samples]
+
+#add genes of interest
+genes_of_interest <- c("SLFN12", "PDE3A")
+gene_ana_table_of_interest <- gene_ana_table[gene_ana_table$gene_name  %in% genes_of_interest,]
+
+wanted_tmp_data <- tpm_df_2[rownames(tpm_df_2) %in% gene_ana_table_of_interest$gene_id,]
+output <- t(wanted_tmp_data)
+output <- cbind(rownames(output), rep("GBM", dim(output)[1]), output)
+colnames(output) <- c("tumor_name", "tumor_type", gene_ana_table_of_interest$gene_name)
+
+write.table(output, "GBM_expression.txt", quote = F, row.names = F, sep = "\t")
