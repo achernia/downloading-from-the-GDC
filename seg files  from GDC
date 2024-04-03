@@ -1,0 +1,31 @@
+rm(list = ls())
+library("TCGAbiolinks")
+library(SummarizedExperiment)
+setwd("/Users/achernia/Documents/wgs_files")
+
+
+#geting CNV data use are tumor type code
+query.cnv.OV <- GDCquery(project = "TCGA-UCEC",
+                           legacy = FALSE,
+                           data.category = "Copy Number Variation",
+                           platform="Affymetrix SNP 6.0",
+                           file.type=".nocnv_grch38.seg.v2.txt",
+                           sample.type = "Primary Tumor")
+GDCdownload(query.cnv.OV)
+query.cnv.OV <- GDCprepare(query = query.cnv.OV,
+                             save = TRUE,
+                             save.filename = "query.cnv.OV",
+                             summarizedExperiment = TRUE)
+save(query.cnv.OV,file="query.cnv.OV.RData")
+seg_file <- data.frame(query.cnv.OV$Sample, query.cnv.OV$Chromosome,query.cnv.OV$Start, query.cnv.OV$End, 
+                       query.cnv.OV$Num_Probes, query.cnv.OV$Segment_Mean)
+colnames(seg_file) <- c("Sample","Chromosome","Start", "End","Num_Probes","Segment_Mean")
+write.table(seg_file, "UCEC.nocnv_grch38.seg", quote = F, row.names = F, sep = "\t")
+
+
+#filter for indivual tumor sa,ples
+sample_list <- c("TCGA-A5-A2K4-01A")
+
+i <- 1
+for(i in 1:length(sample_list)){
+sample_file <- seg_file[grep(sample_list[i], seg_file$Sample),]
