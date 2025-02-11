@@ -23,7 +23,7 @@ colnames(seg_file) <- c("Sample","Chromosome","Start", "End","Num_Probes","Segme
 write.table(seg_file, "UCEC.nocnv_grch38.seg", quote = F, row.names = F, sep = "\t")
 
 
-#filter for indivual tumor sa,ples
+#filter for individual tumor sa,ples
 sample_list <- c("TCGA-A5-A2K4-01A")
 
 i <- 1
