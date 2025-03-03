@@ -24,8 +24,9 @@ write.table(seg_file, "HNSC.nocnv_grch38.seg", quote = F, row.names = F, sep = "
 
 
 #filter for individual tumor samples
-sample_list <- c("TCGA-A5-A2K4-01A")
+sample_list <- c("TCGA-DQ-7595-01A")
 
 i <- 1
 for(i in 1:length(sample_list)){
 sample_file <- seg_file[grep(sample_list[i], seg_file$Sample),]
+}
