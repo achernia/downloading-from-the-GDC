@@ -1,0 +1,20 @@
+library(TCGAbiolinks)
+library(SummarizedExperiment)
+library(dplyr)
+library(DT)
+library(maftools)
+
+## to download from GDC
+query <- GDCquery(
+     project = "TCGA-LUAD",
+     data.category = "Simple Nucleotide Variation",
+     access = "open",
+     data.type = "Masked Somatic Mutation",
+     workflow.type = "Aliquot Ensemble Somatic Variant Merging and Masking"
+ )
+ GDCdownload(query, method = "api", directory = "maf")
+ maf <- GDCprepare(query, directory = "maf")
+ 
+ #to save maf
+ maf_output <- data.frame(maf)
+ write.table(maf_output , "total_luad_hg38_maf.txt", quote = F, sep = "\t", row.names = F)
